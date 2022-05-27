@@ -19,6 +19,7 @@ set -euo pipefail
 RCLOUD_CONFIG="/var/backup/config"
 BORG_ARCHIVE="/var/backup/snapshots"
 BORG_PATH_TO_BACKUP="/mnt/source"
+export BORG_KEYS_DIR="/var/backup/keys"
 
 # Creating a snapshot
 # Not generic: excluding photography cache folder (*/Cache)
