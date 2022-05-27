@@ -10,14 +10,21 @@ are welcomed!
 
 ## Getting Started
 
-1. Pull the latest `alpine` image and create a `photography-backup` container:
+This section will get you started to create snapshots of your photo catalog!
+
+### Create a Container
+
+Pull the latest `alpine` image and create a `photography-backup` container:
+
 ```bash
 $ git clone https://github.com/palazzem/photography-backup.git
 $ docker pull alpine:latest
 $ docker build -t photography-backup .
 ```
 
-2. Create an `env.list` file with the following variables set:
+### Configure your Environment
+
+Create an `env.list` file with the following variables set:
 * `BORG_PASSPHRASE`: defines the key used to encrypt Borg repository. Check Borg documentation for more details.
 * `RCLOUD_REMOTE_NAME`: when you configure your rclone remote, you must use this `name`.
 * `AWS_ACCESS_KEY_ID`: AWS access key.
@@ -25,6 +32,7 @@ $ docker build -t photography-backup .
 * `AWS_BUCKET_NAME`: AWS S3 bucket name where Borg repository is stored.
 
 An example `env.list` file looks like:
+
 ```bash
 BORG_PASSPHRASE=secret_password
 RCLOUD_REMOTE_NAME=aws-glacier
@@ -33,7 +41,9 @@ AWS_SECRET_ACCESS_KEY=Twwr1R+secret_access_key
 AWS_BUCKET_NAME=photography-backup
 ```
 
-3. Run the archive initialization that configures Borg and rclone:
+### Initialize your Snapshots
+Run the archive initialization that configures Borg and rclone:
+
 ```bash
 $ docker run --rm -ti \
   --env-file env.list \
@@ -48,7 +58,10 @@ want to store the encrypted Borg archive.
 In this step `rclone` starts the interactive configuration page that you should complete to create at least one
 remote storage.
 
-4. Once the configuration is done, create and synchronize your first snapshot:
+### Create your first Snapshot
+
+Once the configuration is done, create and synchronize your first snapshot:
+
 ```bash
 $ docker run --rm -ti \
   --env-file env.list \
