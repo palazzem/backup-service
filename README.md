@@ -22,6 +22,41 @@ $ docker pull alpine:latest
 $ docker build -t photography-backup .
 ```
 
+### Configure your Storage
+
+Before using this project, you have to configure your GCP authentication using `gcloud` CLI:
+
+```bash
+gcloud init                            # Don't login with your account
+gcloud auth application-default login  # This provides credentials to the Google Provider
+```
+
+Create a `.auto.tfvars` file inside `provision/` directory with the following variables set:
+```hcl
+google_project_id = "<GCP_PROJECT_ID>"
+google_region     = "<GCP_REGION>"
+google_zone       = "<GCP_ZONE>"
+```
+
+Initialize Terraform locally and start the provisioning:
+```bash
+cd provision
+terraform init
+terraform apply
+```
+
+Once the provision ends, you can re-initialize Terraform to move the global state in your newly created buckets. To do that,
+configure your backend by creating a `.gcs.tfbackend` file inside `provision/` directory with the following variables set:
+```hcl
+bucket = "<YOUR_BUCKET_NAME>"
+prefix = "terraform/state"
+```
+
+Then, re-initialize Terraform:
+```bash
+terraform init -backend-config=.gcs.tfbackend
+```
+
 ### Configure your Environment
 
 Create an `env.list` file with the following variables set:
