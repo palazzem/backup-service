@@ -1,4 +1,6 @@
-FROM alpine:latest
+#checkov:skip=CKV_DOCKER_2: No healthchecks are needed
+#checkov:skip=CKV_DOCKER_3: No users are needed
+FROM alpine:3.18
 LABEL maintainer="Emanuele Palazzetti <emanuele.palazzetti@gmail.com>"
 
 # Copy scripts
