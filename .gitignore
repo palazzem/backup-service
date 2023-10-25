@@ -1,3 +1,8 @@
+# Project files
+.env
+config/
+cache/
+
 # Local .terraform directories
 **/.terraform/*
 
@@ -33,6 +38,3 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
-
-# ENV files
-.env
