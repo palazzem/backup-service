@@ -7,4 +7,5 @@ LABEL maintainer="Emanuele Palazzetti <emanuele.palazzetti@gmail.com>"
 COPY scripts/* /usr/local/bin/
 
 # Add backup dependencies
-RUN apk add --no-cache borgbackup rclone
+RUN mkdir /config \
+  && apk add --no-cache borgbackup rclone fuse3
