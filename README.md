@@ -1,34 +1,23 @@
 # Photography Backup
 
-Docker container that uses [Borg](https://borgbackup.readthedocs.io/en/stable/) and [rclone](https://rclone.org/) to make a full catalog backup.
-In the current stage, the project is not meant to be a generic container for any kind of backup, even though contributions to make it happen
-are welcomed!
+Docker container that uses [Borg](https://borgbackup.readthedocs.io/en/stable/) and [rclone](https://rclone.org/) to create backups deployed
+in Google Cloud Storage.
 
 ## Requirements
 
-* Docker to build a standalone container
+* A Google account with a [GCP](https://cloud.google.com/) project (billing must be enabled)
+* `gcloud` CLI to configure your GCP authentication
+* `terraform` to provision the required resources on GCP
+* `docker` to build and run the backup container
 
 ## Getting Started
-
-This section will get you started to create snapshots of your photo catalog!
-
-### Create a Container
-
-Pull the latest `alpine` image and create a `photography-backup` container:
-
-```bash
-$ git clone https://github.com/palazzem/photography-backup.git
-$ docker pull alpine:latest
-$ docker build -t photography-backup .
-```
 
 ### Configure your Storage
 
 Before using this project, you have to configure your GCP authentication using `gcloud` CLI:
 
 ```bash
-gcloud init                            # Don't login with your account
-gcloud auth application-default login  # This provides credentials to the Google Provider
+gcloud auth application-default login
 ```
 
 Create a `.auto.tfvars` file inside `provision/` directory with the following variables set:
@@ -52,60 +41,72 @@ bucket = "<YOUR_BUCKET_NAME>"
 prefix = "terraform/state"
 ```
 
-Then, re-initialize Terraform:
+Then, re-initialize Terraform to move the state on Google Cloud Storage:
 ```bash
 terraform init -backend-config=.gcs.tfbackend
 ```
 
-### Configure your Environment
+### Build Backup Container
 
-Create an `env.list` file with the following variables set:
+Build the backup container with the following command:
+```bash
+docker build -t local/backup:alpine .
+```
+
+### Configure your Backup
+
+Create a `.env` file with the following variables set:
 * `BORG_PASSPHRASE`: defines the key used to encrypt Borg repository. Check Borg documentation for more details.
-* `RCLOUD_REMOTE_NAME`: when you configure your rclone remote, you must use this `name`.
-* `AWS_ACCESS_KEY_ID`: AWS access key.
-* `AWS_SECRET_ACCESS_KEY`: AWS secret key.
-* `AWS_BUCKET_NAME`: AWS S3 bucket name where Borg repository is stored.
+* `RCLONE_BUCKET_NAME`: the name of the bucket created by Terraform in the previous step.
+* `RCLOUD_REMOTE_NAME`: when you configure your rclone remote, you must use this name.
 
-An example `env.list` file looks like:
-
+An example `.env` file looks like:
 ```bash
 BORG_PASSPHRASE=secret_password
-RCLOUD_REMOTE_NAME=aws-glacier
-AWS_ACCESS_KEY_ID=AKIAACCESSKEY
-AWS_SECRET_ACCESS_KEY=Twwr1R+secret_access_key
-AWS_BUCKET_NAME=photography-backup
+RCLONE_REMOTE_PATH=gcp-storage:73858969-bucket-backup
+CROND_SCHEDULE=0 2 * * *
 ```
 
-### Initialize your Snapshots
-Run the archive initialization that configures Borg and rclone:
+In this case, the backup encrypted with `secret_password` will be executed in a Google Cloud Storage in a bucket
+named `73858969-bucket-backup` every day at 2 AM.
 
+### Run the container
+
+Once the configuration is done, you can run the container as a service that will execute the backup based
+on the `CROND_SCHEDULE`. If the backup is not initialized, the container will create a new repository in the
+`rclone` mount folder.
+
+To run the container as a service, use the following command:
 ```bash
-$ docker run --rm -ti \
-  --env-file env.list \
-  --volume <PATH_TO_BACKUP>:/mnt/source \
-  --volume <BORG_ARCHIVE_PATH>:/var/backup \
-  photography-backup:latest initialize_archive
+docker run --rm -d \
+  --env-file .env \
+  --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
+  --volume $PWD/config:/config \
+  --volume $PWD/cache:/cache \
+  --volume <PATH>:/data:ro \
+  local/backup:alpine
 ```
 
-`<PATH_TO_BACKUP>` should point to your catalog local folder, while `<BORG_ARCHIVE_PATH>` to where you
-want to store the encrypted Borg archive.
+`<PATH>` should point to the host folder you want to backup.
 
-In this step `rclone` starts the interactive configuration page that you should complete to create at least one
-remote storage.
+### Extract the Archive
 
-### Create your first Snapshot
-
-Once the configuration is done, create and synchronize your first snapshot:
-
+To extract the backup archive you must stop any running container. Once the container is stopped, you can
+use the following helper:
 ```bash
-$ docker run --rm -ti \
-  --env-file env.list \
-  --volume <PATH_TO_BACKUP>:/mnt/source \
-  --volume <BORG_ARCHIVE_PATH>:/var/backup \
-  photography-backup:latest create_snapshot
+docker run --rm -d \
+  --env-file .env \
+  --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
+  --volume $PWD/config:/config \
+  --volume $PWD/cache:/cache \
+  --volume <PATH>:/mnt/extract \
+  local/backup:alpine extract.sh
 ```
+
+`<PATH>` should point to the host folder where you want to extract the data.
 
 ## Development
 
-We accept external contributions even though the project is mostly designed for personal needs. If you think some parts can be exposed with a
-more generic interface, feel free to open a [GitHub issue](https://github.com/palazzem/photography-backup/issues) to discuss your suggestion.
+We accept external contributions even though the project is mostly designed for personal needs.
+If you think some parts can be exposed with a more generic interface, feel free to open a
+[GitHub issue](https://github.com/palazzem/photography-backup/issues) to discuss your suggestion.
