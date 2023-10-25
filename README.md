@@ -10,9 +10,7 @@ in Google Cloud Storage.
 * `terraform` to provision the required resources on GCP
 * `docker` to build and run the backup container
 
-## Getting Started
-
-### Configure your Storage
+## Configure Cloud Storage
 
 Before using this project, you have to configure your GCP authentication using `gcloud` CLI:
 
@@ -46,31 +44,23 @@ Then, re-initialize Terraform to move the state on Google Cloud Storage:
 terraform init -backend-config=.gcs.tfbackend
 ```
 
-### Build Backup Container
+## Backup Service
 
-Build the backup container with the following command:
+### Configure Backup Environment
+
+To prepare your environment, use the `env.example` file as a base to create your `.env` file:
 ```bash
-docker build -t local/backup:alpine .
+cp env.example .env
 ```
 
-### Configure your Backup
+The environment file is picked up automatically by Docker Compose, but you can also use it with the `docker run` command.
+These are the variables you must set:
+* `DATA_PATH`: is the folder you want to backup. Example: `/home/user/Pictures`.
+* `BORG_PASSPHRASE`: is the key used to encrypt Borg repository. Check Borg documentation for more details.
+* `RCLONE_REMOTE_PATH`: is the remote storage path in `rcloud` format. Example: `REMOTE_NAME:BUCKET_NAME`.
+* `CROND_SCHEDULE`: is the schedule used by `crond` to execute the backup. Example: `0 2 * * *` (every day at 2 AM).
 
-Create a `.env` file with the following variables set:
-* `BORG_PASSPHRASE`: defines the key used to encrypt Borg repository. Check Borg documentation for more details.
-* `RCLONE_BUCKET_NAME`: the name of the bucket created by Terraform in the previous step.
-* `RCLOUD_REMOTE_NAME`: when you configure your rclone remote, you must use this name.
-
-An example `.env` file looks like:
-```bash
-BORG_PASSPHRASE=secret_password
-RCLONE_REMOTE_PATH=gcp-storage:73858969-bucket-backup
-CROND_SCHEDULE=0 2 * * *
-```
-
-In this case, the backup encrypted with `secret_password` will be executed in a Google Cloud Storage in a bucket
-named `73858969-bucket-backup` every day at 2 AM.
-
-### Run the container
+### Start the Container
 
 Once the configuration is done, you can run the container as a service that will execute the backup based
 on the `CROND_SCHEDULE`. If the backup is not initialized, the container will create a new repository in the
@@ -78,16 +68,8 @@ on the `CROND_SCHEDULE`. If the backup is not initialized, the container will cr
 
 To run the container as a service, use the following command:
 ```bash
-docker run --rm -d \
-  --env-file .env \
-  --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
-  --volume $PWD/config:/config \
-  --volume $PWD/cache:/cache \
-  --volume <PATH>:/data:ro \
-  local/backup:alpine
+docker compose up -d
 ```
-
-`<PATH>` should point to the host folder you want to backup.
 
 ### Extract the Archive
 
