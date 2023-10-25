@@ -5,16 +5,23 @@ services:
     build: .
     image: local/backup:alpine
     container_name: backup_container
+    restart: always
+
     environment:
-      env_file: .env
+      - DATA_PATH=${DATA_PATH}
+      - BORG_PASSPHRASE=${BORG_PASSPHRASE}
+      - RCLONE_REMOTE_PATH=${RCLONE_REMOTE_PATH}
+      - CROND_SCHEDULE=${CROND_SCHEDULE}
+      - BORG_FIRST_RUN=${BORG_FIRST_RUN}
+
     cap_add:
       - SYS_ADMIN
     devices:
       - /dev/fuse
     security_opt:
       - apparmor:unconfined
+
     volumes:
       - ./config:/config
       - ./cache:/cache
       - ${DATA_PATH}:/data:ro
-    restart: always
