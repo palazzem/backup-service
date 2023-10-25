@@ -7,6 +7,7 @@ set -euo pipefail
 # Required environment variables:
 # - RCLONE_REMOTE_PATH: name of the rclone remote path to use. Use a valid format (REMOTE_NAME:PATH).
 # - CROND_SCHEDULE: crond schedule to use. Use a crond valid format (* * * * *).
+# - BORG_FIRST_RUN: set to 1 to perform a full backup on the first run. Set to 0 to perform a backup only with cron.
 
 # Exit point if commands are passed to `docker run`
 if [ "$#" -gt 0 ]; then
@@ -46,6 +47,12 @@ if [ ! -f "$BORG_ARCHIVE/config" ]; then
 else
   echo "Borg archive already initialized. Using the following repository:"
   borg info $BORG_ARCHIVE
+fi
+
+# Handle the first run if set
+if [ "$BORG_FIRST_RUN" = "1" ]; then
+  echo "Performing a full backup on the first run."
+  /usr/local/bin/create_snapshot.sh
 fi
 
 # Create a crond rule to start the backup at the given time
