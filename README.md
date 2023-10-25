@@ -53,6 +53,7 @@ To boostrap your environment, launch the following commands from the repository 
 mkdir config/
 mkdir cache/
 cp env.example .env
+chmod 600 .env
 ```
 
 Docker Compose uses automatically the `.env` file. You must update included values as follows:
