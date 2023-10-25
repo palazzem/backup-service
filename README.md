@@ -48,13 +48,14 @@ terraform init -backend-config=.gcs.tfbackend
 
 ### Configure Backup Environment
 
-To prepare your environment, use the `env.example` file as a base to create your `.env` file:
+To boostrap your environment, launch the following commands from the repository folder:
 ```bash
+mkdir config/
+mkdir cache/
 cp env.example .env
 ```
 
-The environment file is picked up automatically by Docker Compose, but you can also use it with the `docker run` command.
-These are the variables you must set:
+Docker Compose uses automatically the `.env` file. You must update included values as follows:
 * `DATA_PATH`: is the folder you want to backup. Example: `/home/user/Pictures`.
 * `BORG_PASSPHRASE`: is the key used to encrypt Borg repository. Check Borg documentation for more details.
 * `RCLONE_REMOTE_PATH`: is the remote storage path in `rcloud` format. Example: `REMOTE_NAME:BUCKET_NAME`.
