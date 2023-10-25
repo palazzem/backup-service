@@ -50,8 +50,8 @@ terraform init -backend-config=.gcs.tfbackend
 
 To boostrap your environment, launch the following commands from the repository folder:
 ```bash
-mkdir config/
-mkdir cache/
+mkdir -p config/
+mkdir -p cache/
 cp env.example .env
 chmod 600 .env
 ```
