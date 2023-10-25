@@ -9,3 +9,8 @@ COPY scripts/* /usr/local/bin/
 # Add backup dependencies
 RUN mkdir /config \
   && apk add --no-cache borgbackup rclone fuse3
+
+WORKDIR /config
+
+VOLUME ["/data", "/config", "/cache"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
