@@ -25,3 +25,4 @@ services:
       - ./config:/config
       - ./cache:/cache
       - ${DATA_PATH}:/data:ro
+      - ${DATA_RECOVERY}:/mnt/extract
