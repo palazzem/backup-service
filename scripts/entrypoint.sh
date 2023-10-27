@@ -50,7 +50,7 @@ else
 fi
 
 # Handle the first run if set
-if [ "$BORG_FIRST_RUN" = "1" ]; then
+if [ "$BORG_FIRST_RUN" = 1 ]; then
   echo "Performing a full backup on the first run."
   /usr/local/bin/create_snapshot.sh
 fi
