@@ -78,16 +78,8 @@ docker compose up -d
 To extract the backup archive you must stop any running container. Once the container is stopped, you can
 use the following helper:
 ```bash
-docker run --rm -ti \
-  --env-file .env \
-  --cap-add SYS_ADMIN --device /dev/fuse --security-opt apparmor:unconfined \
-  --volume $PWD/config:/config \
-  --volume $PWD/cache:/cache \
-  --volume <PATH>:/mnt/extract \
-  local/backup:alpine extract.sh
+docker compose run --rm -ti backup extract.sh
 ```
-
-`<PATH>` should point to the host folder where you want to extract the data.
 
 ## Development
 
