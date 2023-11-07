@@ -45,7 +45,7 @@ borg info $BORG_ARCHIVE
 borg list $BORG_ARCHIVE
 echo
 echo "To extract a snapshot, run:"
-echo "  borg extract $BORG_ARCHIVE::SNAPSHOT_NAME"
+echo "  borg extract --progress $BORG_ARCHIVE::SNAPSHOT_NAME"
 
 # Let users interact with the system
 cd $BORG_EXTRACT_DIR
