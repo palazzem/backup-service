@@ -44,6 +44,7 @@ rclone mount --config $RCLONE_CONFIG \
 if [ ! -f "$BORG_ARCHIVE/config" ]; then
   echo "Borg archive is not initialized. Proceed with the initialization."
   borg init --encryption=repokey $BORG_ARCHIVE
+  echo "Borg archive initialized."
 else
   echo "Borg archive already initialized. Using the following repository:"
   borg info $BORG_ARCHIVE
@@ -60,6 +61,7 @@ echo "$CROND_SCHEDULE /usr/local/bin/create_snapshot.sh" > /var/spool/cron/cront
 
 # Launch backup schedule (crond)
 # NOTE: This is a blocking call that will run until the container is stopped.
+echo "crond started with the following schedule: $CROND_SCHEDULE"
 crond -l 8 -f
 
 # Unmount the folder
