@@ -1,6 +1,6 @@
 # Main
 terraform {
-  required_version = "1.6.2"
+  required_version = "1.6.4"
 
   # Comment this out during the first run (it requires the bucket to be created first)
   backend "gcs" {}
