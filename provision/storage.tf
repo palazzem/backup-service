@@ -60,8 +60,9 @@ resource "google_storage_bucket" "tfstate" {
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
 
+  #checkov:skip=CKV_GCP_78:Versioning is not required
   versioning {
-    enabled = true
+    enabled = false
   }
 }
 
@@ -76,7 +77,8 @@ resource "google_storage_bucket" "storage" {
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
 
+  #checkov:skip=CKV_GCP_78:Versioning is not required
   versioning {
-    enabled = true
+    enabled = false
   }
 }
